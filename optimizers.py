@@ -97,7 +97,8 @@ class Basic_Eval(Abstract_Evaluator):
         self.dim = self.sup.shape[1] if len(self.sup.shape) == 2 else 1
 
     def test_network(self, network: nn.Abstract_Network, current_step:int) -> Dict:
-        
+        ''''''
+        state = network.state()
         test_error = 0
         z_test = np.zeros((self.samples, self.dim)).squeeze()
 
@@ -117,7 +118,7 @@ class Basic_Eval(Abstract_Evaluator):
             test_error = np.mean(test_error)
 
         sum_entry = {'tst_err':test_error, 'phi':network.get_decoder(),\
-                     'z_test':z_test} # Note: Can add more save items here
+                     'z_test':z_test, 'state':state} # Note: Can add more save items here
 
         return sum_entry
 
@@ -125,35 +126,9 @@ class Basic_Eval(Abstract_Evaluator):
         '''Method for saving simulation results.'''
 
         results_df = pd.DataFrame(results)
-
-        Q = np.unique(results_df['q'].to_numpy())
-        Q.sort()
-        G = np.unique(results_df['g'].to_numpy())
-        G.sort()
-
-        #### Extract numpy arrays from padas dataframe
-        phi_shape = (self.N,) if self.dim == 1 else (self.dim, self.N)
-        phi_results = np.zeros((G.shape[0], Q.shape[0], *phi_shape))
-        z_shape = (self.samples,) if self.dim == 1 else (self.samples, self.dim)
-        z_test_results = np.zeros((G.shape[0], Q.shape[0], *z_shape))
-        for idx, result in results_df.iterrows():
-            g_idx = np.argwhere(G==result['g'])[0,0]
-            q_idx = np.argwhere(Q==result['q'])[0,0]
-
-            phi_results[g_idx, q_idx] = result['phi']
-            z_test_results[g_idx, q_idx] = result['z_test']
-
-            del result['phi'], result['z_test']
-
-        results_df = results_df.drop(['phi', 'z_test'], axis=1)
-
-        # Save pandas dataframe and numpy arrays
-        results_df.to_csv(save_dir + 'sum_data.csv', index=False)
-        np.save(save_dir + 'phi_results.npy', phi_results)
-        np.save(save_dir + 'z_test_results.npy', z_test_results)
+        results_df.to_pickle(save_dir + 'sum_data.csv')
 
     def to_string(self) -> str:
         return f'\n\tdt:{self.dt}'\
             + f'\n\teval_steps:{self.eval_steps}'\
             + f'\n\teval_step:{self.sample_rate}'
-            

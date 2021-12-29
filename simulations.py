@@ -79,7 +79,7 @@ def parallel_QG_sweep(sweep:list, sweep_info: str,\
     with open(dir_path + 'Description.txt', mode='w') as desc_file:
             desc_file.write(f'Date:{date.today()}\n')
             # Sweep
-            desc_file.write(sweep_info)
+            desc_file.write(sweep_info +'\n')
             # Network
             desc_file.write(net_factory.to_string())
             # Optimizer

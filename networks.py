@@ -4,8 +4,8 @@ from abc import ABC, abstractmethod
 
 import numpy as np
 
-#### Functions ####
 
+#### Functions ####
 
 def sigma_gen(N, g, p, seed=None) -> np.ndarray:
     ''''''
@@ -34,6 +34,7 @@ def omega_gen(N, q=2.0, shift=-0.5, seed=None, dim=1) -> np.ndarray:
 
 
 #### Classes ####
+#TODO: Create state methods
 
 class Abstract_Network(ABC):
     '''Abstract class for all networks in framework'''
@@ -292,7 +293,15 @@ class LIF(Abstract_Network):
         return z_out
 
     def state(self) -> dict():
-        return super().state()
+        state = {}
+        state['v'] = self.v
+        state['i_ps'] = self.i_ps
+        state['h'] = self.h
+        state['h_rate'] = self.h_rate
+        state['R'] = self.R
+        state['z'] = self.z
+
+        return state
     
     def get_decoder(self) -> np.ndarray:
         return self.phi
@@ -412,6 +421,7 @@ class LIF_Rate(Abstract_Network):
 
     def to_string(self) -> str:
         return super().to_string()
+
 
 #### Factory ####
 
