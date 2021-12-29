@@ -178,9 +178,8 @@ class LIF(Abstract_Network):
         else:
             self.phi = np.zeros((self.dim, self.N)) # decoder
 
-        self.refr_timer = np.zeros(N) # Timer for spike refractor periods
-
         #### State Variables
+        self.refr_timer = np.zeros(N) # Timer for spike refractor periods
         self.v = self.v_reset + np.random.rand(N) * (30 - self.v_reset) # neuron voltage
         
         self.i_ps = np.zeros(N) # post synaptic current
@@ -295,6 +294,7 @@ class LIF(Abstract_Network):
     def state(self) -> dict():
         state = {}
         state['v'] = self.v
+        state['refr_timer'] = self.refr_timer
         state['i_ps'] = self.i_ps
         state['h'] = self.h
         state['h_rate'] = self.h_rate
@@ -338,9 +338,8 @@ class LIF_Rate(Abstract_Network):
             self.phi = np.zeros((self.dim, self.N)) # decoder
 
         #### State Variables
-        self.rate = np.zeros(N)
         self.i_ps = self.i_bias*(np.random.rand(N)-0.5) # post synaptic current
-        self.h = np.zeros(N) # current filter        self.i = np.zeros(N) # neuronal current
+        self.h = np.zeros(N) # current filter
         
         self.h_rate = np.zeros(N) # spike rate filter
         self.R = np.zeros(N) # firing rates
@@ -411,7 +410,14 @@ class LIF_Rate(Abstract_Network):
         return z_out
 
     def state(self) -> dict():
-        return super().state()
+        state = {}
+        state['i_ps'] = self.i_ps
+        state['h'] = self.h
+        state['h_rate'] = self.h_rate
+        state['R'] = self.R
+        state['z'] = self.z
+
+        return state
 
     def get_decoder(self) -> np.ndarray:
         return self.phi

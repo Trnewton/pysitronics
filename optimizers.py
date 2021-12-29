@@ -126,7 +126,7 @@ class Basic_Eval(Abstract_Evaluator):
         '''Method for saving simulation results.'''
 
         results_df = pd.DataFrame(results)
-        results_df.to_pickle(save_dir + 'sum_data.csv')
+        results_df.to_pickle(save_dir + 'sum_data.pkl')
 
     def to_string(self) -> str:
         return f'\n\tdt:{self.dt}'\
