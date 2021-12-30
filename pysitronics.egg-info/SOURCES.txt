@@ -1,0 +1,6 @@
+pyproject.toml
+setup.cfg
+pysitronics.egg-info/PKG-INFO
+pysitronics.egg-info/SOURCES.txt
+pysitronics.egg-info/dependency_links.txt
+pysitronics.egg-info/top_level.txt
