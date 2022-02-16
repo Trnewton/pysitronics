@@ -54,7 +54,7 @@ class Abstract_Network(ABC):
     @abstractmethod
     def get_decoder(self) -> np.ndarray:
         '''Gets value of network decoder.'''
-    
+
     @abstractmethod
     def set_decoder(self, phi) -> None:
         '''Updates the decocder.'''
@@ -102,7 +102,7 @@ class Rate(Abstract_Network):
                 self.phi = np.zeros(self.N)
             else:
                 self.phi = np.zeros((self.N, self.dim))
-    
+
     def step(self, dt: float):
         '''
             Takes a step of size dt for the recursive network.
@@ -142,7 +142,7 @@ class Rate(Abstract_Network):
 
     def state(self) -> dict():
         return super().state()
-    
+
     def get_decoder(self) -> np.ndarray:
         return self.phi
 
@@ -168,28 +168,28 @@ class LIF(Abstract_Network):
         self.t_r = t_r
         self.t_d = t_d
         self.dim = dim
-        
+
         #### Topological Variables
         self.N = N
         self.sigma = sigma # resevoir connections
         self.omega = omega # feedback connections
         if dim == 1:
-            self.phi = np.zeros(N) # decoder 
+            self.phi = np.zeros(N) # decoder
         else:
             self.phi = np.zeros((self.dim, self.N)) # decoder
 
         #### State Variables
         self.refr_timer = np.zeros(N) # Timer for spike refractor periods
         self.v = self.v_reset + np.random.rand(N) * (30 - self.v_reset) # neuron voltage
-        
+
         self.i_ps = np.zeros(N) # post synaptic current
         self.h = np.zeros(N) # current filter        self.i = np.zeros(N) # neuronal current
-        
+
         self.h_rate = np.zeros(N) # spike rate filter
         self.R = np.zeros(N) # firing rates
 
         self.z = np.matmul(self.phi, self.R) # readout
-    
+
     def step(self, dt: float):
         '''
             Takes a step of size dt for the recursive network.
@@ -209,11 +209,11 @@ class LIF(Abstract_Network):
             self.i = self.i_ps + self.omega * self.z + self.i_bias
         else:
             self.i = self.i_ps + np.matmul(self.omega, self.z) + self.i_bias
-        
+
         # Compute neuronal voltages with refractory period
         self.refr_timer = np.maximum(0, self.refr_timer-dt)
         self.v += dt * ((self.refr_timer<=0) * (self.i - self.v) / self.t_m)
-        
+
         # Get spiking neurons
         self.spikes = self.v >= self.v_peak
         self.spike_idx = np.argwhere(self.spikes)
@@ -221,7 +221,7 @@ class LIF(Abstract_Network):
 
         # Set refractory timer
         self.refr_timer[self.spike_idx] = self.t_ref
-        
+
         # Compute exponential filter
         if self.t_r == 0: # Single exponential filter
             self.i_ps = self.i_ps * np.exp(-dt/self.t_d) + self.spike_current * np.any(self.spikes) / self.t_d
@@ -230,17 +230,17 @@ class LIF(Abstract_Network):
             # Current filter
             self.i_ps = self.i_ps * np.exp(-dt/self.t_r) + dt * self.h
             self.h = self.h * np.exp(-dt/self.t_d) + self.spike_current * np.any(self.spikes) / (self.t_d * self.t_r)
-            
+
             # Spike rate filter
-            self.R = self.R * np.exp(-dt/self.t_r) + dt * self.h_rate 
+            self.R = self.R * np.exp(-dt/self.t_r) + dt * self.h_rate
             self.h_rate = self.h_rate * np.exp(-dt/self.t_d) + self.spikes / (self.t_r * self.t_d)
-            
+
         ## interpolant implementation
         self.v[self.spike_idx] += (30 - self.v[self.spike_idx])
         self.v[self.v >= self.v_peak] += (self.v_reset - self.v[self.v >= self.v_peak])
-        
+
         self.z = np.matmul(self.phi, self.R)
-        
+
         return self.z, self.R
 
     def simulate(self, dt: float, N: int) -> np.ndarray:
@@ -256,11 +256,11 @@ class LIF(Abstract_Network):
                 self.i = self.i_ps + self.omega * self.z + self.i_bias
             else:
                 self.i = self.i_ps + np.matmul(self.omega, self.z) + self.i_bias
-            
+
             # Compute neuronal voltages with refractory period
             self.refr_timer = np.maximum(0, self.refr_timer-dt)
             self.v += dt * ((self.refr_timer<=0) * (self.i - self.v) / self.t_m)
-            
+
             # Get spiking neurons
             self.spikes = self.v >= self.v_peak
             self.spike_idx = np.argwhere(self.spikes)
@@ -268,7 +268,7 @@ class LIF(Abstract_Network):
 
             # Set refractory timer
             self.refr_timer[self.spike_idx] = self.t_ref
-            
+
             # Compute exponential filter
             if self.t_r == 0: # Single exponential filter
                 self.i_ps = self.i_ps * e_t_d + self.spike_current * np.any(self.spikes) / self.t_d
@@ -277,15 +277,15 @@ class LIF(Abstract_Network):
                 # Current filter
                 self.i_ps = self.i_ps * e_t_r + dt * self.h
                 self.h = self.h * e_t_d + self.spike_current * np.any(self.spikes) / (self.t_d * self.t_r)
-                
+
                 # Spike rate filter
-                self.R = self.R * e_t_r + dt * self.h_rate 
+                self.R = self.R * e_t_r + dt * self.h_rate
                 self.h_rate = self.h_rate * e_t_d + self.spikes / (self.t_r * self.t_d)
-                
+
             ## interpolant implementation
             self.v[self.spike_idx] += (30 - self.v[self.spike_idx])
             self.v[self.v >= self.v_peak] += (self.v_reset - self.v[self.v >= self.v_peak])
-            
+
             self.z = np.matmul(self.phi, self.R)
             z_out[n] = self.z
 
@@ -302,7 +302,7 @@ class LIF(Abstract_Network):
         state['z'] = self.z
 
         return state
-    
+
     def get_decoder(self) -> np.ndarray:
         return self.phi
 
@@ -313,11 +313,11 @@ class LIF(Abstract_Network):
         return super().to_string()
 
 class LIF_Rate(Abstract_Network):
-    def __init__(self, N:int, sigma:np.ndarray, omega:np.ndarray, t_m:float, 
+    def __init__(self, N:int, sigma:np.ndarray, omega:np.ndarray, t_m:float,
                 t_ref:float, v_reset:float, v_peak:float, i_bias:float,\
                 t_r:float, t_d:float, dim=1):
         ''''''
-        
+
         #### LIF Variables
         self.t_m = t_m
         self.t_ref = t_ref
@@ -327,25 +327,25 @@ class LIF_Rate(Abstract_Network):
         self.t_r = t_r
         self.t_d = t_d
         self.dim = dim
-        
+
         #### Topological Variables
         self.N = N
         self.sigma = sigma # resevoir connections
         self.omega = omega # feedback connections
         if dim == 1:
-            self.phi = np.zeros(N) # decoder 
+            self.phi = np.zeros(N) # decoder
         else:
             self.phi = np.zeros((self.dim, self.N)) # decoder
 
         #### State Variables
         self.i_ps = self.i_bias*(np.random.rand(N)-0.5) # post synaptic current
         self.h = np.zeros(N) # current filter
-        
+
         self.h_rate = np.zeros(N) # spike rate filter
         self.R = np.zeros(N) # firing rates
 
         self.z = np.matmul(self.phi, self.R) # readout
-        
+
     def step(self, dt:float):
         ''''''
 
@@ -356,7 +356,7 @@ class LIF_Rate(Abstract_Network):
 
         self.rate = np.nan_to_num(1/(self.t_r - self.t_m * (np.log(self.i - self.v_peak) - np.log(self.i - self.v_reset))), copy=False)
         self.spike_current = dt * np.matmul(self.sigma, self.rate)
-        
+
         # Compute exponential filter
         if self.t_r == 0: # Single exponential filter
             self.i_ps = self.i_ps * np.exp(-dt/self.t_d) + self.spike_current / self.t_d
@@ -365,13 +365,13 @@ class LIF_Rate(Abstract_Network):
             # Current filter
             self.i_ps = self.i_ps * np.exp(-dt/self.t_r) + dt * self.h
             self.h = self.h * np.exp(-dt/self.t_d) + self.spike_current / (self.t_d * self.t_r)
-            
+
             # Spike rate filter
-            self.R = self.R * np.exp(-dt/self.t_r) + dt * self.h_rate 
+            self.R = self.R * np.exp(-dt/self.t_r) + dt * self.h_rate
             self.h_rate = self.h_rate * np.exp(-dt/self.t_d) + dt * self.rate / (self.t_r * self.t_d)
-            
+
         self.z = np.matmul(self.phi, self.R)
-        
+
         return self.z, self.R
 
     def simulate(self, dt: float, N: int) -> np.ndarray:
@@ -390,7 +390,7 @@ class LIF_Rate(Abstract_Network):
 
             self.rate = np.nan_to_num(1/(self.t_r - self.t_m * (np.log(self.i - self.v_peak) - np.log(self.i - self.v_reset))), copy=False)
             self.spike_current = dt * np.matmul(self.sigma, self.rate)
-            
+
             # Compute exponential filter
             if self.t_r == 0: # Single exponential filter
                 self.i_ps = self.i_ps * e_t_d + self.spike_current / self.t_d
@@ -399,11 +399,11 @@ class LIF_Rate(Abstract_Network):
                 # Current filter
                 self.i_ps = self.i_ps * e_t_r + dt * self.h
                 self.h = self.h * e_t_d + self.spike_current / (self.t_d * self.t_r)
-                
+
                 # Spike rate filter
-                self.R = self.R * e_t_r + dt * self.h_rate 
+                self.R = self.R * e_t_r + dt * self.h_rate
                 self.h_rate = self.h_rate * e_t_d + dt * self.rate / (self.t_r * self.t_d)
-                
+
             self.z = np.matmul(self.phi, self.R)
             z_out[n] = self.z
 
@@ -446,7 +446,7 @@ class Network_Factory:
         self.net_params = net_params
         self.row_balance = row_balance
 
-    def create_network(self, q:float, g:float, omega_seed:int, sigma_seed:int) -> Abstract_Network:
+    def create_network(self, q:float, g:float, omega_seed:int=None, sigma_seed:int=None) -> Abstract_Network:
         '''Returns created network.'''
         omega = omega_gen(self.N, q, seed=omega_seed, dim=self.net_params['dim'])
 

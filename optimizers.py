@@ -22,7 +22,7 @@ class FORCE(Abstract_Optimizer):
     def __init__(self, alpha, supervisor, dt, warmup_steps, training_steps, learn_step) -> None:
         super().__init__()
 
-        self.alpha = alpha 
+        self.alpha = alpha
         self.sup = supervisor
         self.dt = dt
         self.warmup_steps = warmup_steps
@@ -56,9 +56,9 @@ class FORCE(Abstract_Optimizer):
                     dphi = - c * error * k
                 else:
                     dphi = - c * np.outer(error, k)
-                
+
                 network.set_decoder(network.get_decoder() + dphi)
-        
+
         return self.training_steps
 
     def to_string(self) -> str:
@@ -73,7 +73,7 @@ class Abstract_Evaluator(ABC):
 
     @abstractmethod
     def test_network(self, network:nn.Abstract_Network, current_step:int) -> Dict:
-        '''Tests the training of the given network and returns the results as a 
+        '''Tests the training of the given network and returns the results as a
             dictionary to be collected and made into a pandas dataframe.'''
 
     @abstractmethod
@@ -109,10 +109,10 @@ class Basic_Eval(Abstract_Evaluator):
             # Store testing data
             if (n % self.sample_rate) == 0:
                 z_test[int(n/self.sample_rate)] = z
-            
-            test_error += (f-z) * (f-z) 
 
-        test_error = np.sqrt(np.sum(test_error) * self.dt)
+            test_error += (f-z) * (f-z)
+
+        test_error = np.sqrt(np.sum(test_error) * self.dt) / self.eval_steps
 
         if self.dim != 1:
             test_error = np.mean(test_error)
