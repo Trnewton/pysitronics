@@ -346,7 +346,7 @@ class LIF_Rate(Abstract_Network):
 
         self.z = np.matmul(self.phi, self.R) # readout
 
-    def step(self, dt:float):
+    def step(self, dt:float, i_in:np.ndarray=0):
         ''''''
 
         if self.dim == 1:
@@ -374,7 +374,7 @@ class LIF_Rate(Abstract_Network):
 
         return self.z, self.R
 
-    def simulate(self, dt: float, N: int) -> np.ndarray:
+    def simulate(self, dt: float, N: int, i_in:np.ndarray=None) -> np.ndarray:
         ''''''
 
         z_out = np.zeros(N) if self.dim==1 else np.zeros((N, self.dim))
