@@ -291,7 +291,7 @@ class LIF(Abstract_Network):
 
         return z_out
 
-    def state(self) -> dict():
+    def state(self) -> dict:
         state = {}
         state['v'] = self.v
         state['refr_timer'] = self.refr_timer
@@ -302,6 +302,15 @@ class LIF(Abstract_Network):
         state['z'] = self.z
 
         return state
+
+    def set_state(self, state:dict):
+        self.v = state['v']
+        self.refr_timer = state['refr_timer']
+        self.i_ps = state['i_ps']
+        self.h = state['h']
+        self.h_rate = state['h_rate']
+        self.R = state['R']
+        self.z = state['z']
 
     def get_decoder(self) -> np.ndarray:
         return self.phi
@@ -409,7 +418,7 @@ class LIF_Rate(Abstract_Network):
 
         return z_out
 
-    def state(self) -> dict():
+    def state(self) -> dict:
         state = {}
         state['i_ps'] = self.i_ps
         state['h'] = self.h
@@ -418,6 +427,13 @@ class LIF_Rate(Abstract_Network):
         state['z'] = self.z
 
         return state
+
+    def set_state(self, state:dict):
+        self.i_ps = state['i_ps']
+        self.h = state['h']
+        self.h_rate = state['h_rate']
+        self.R = state['R']
+        self.z = state['z']
 
     def get_decoder(self) -> np.ndarray:
         return self.phi

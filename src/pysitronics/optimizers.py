@@ -34,7 +34,7 @@ class FORCE(Abstract_Optimizer):
         # PreTraining network run
         _ = network.simulate(self.dt, self.warmup_steps)
 
-        P = (1/self.alpha) * np.eye(network.N)
+        P = self.alpha * np.eye(network.N)
         c = 0
         k = 0
 
